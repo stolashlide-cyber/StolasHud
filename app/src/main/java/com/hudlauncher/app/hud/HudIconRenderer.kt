@@ -3,6 +3,10 @@ package com.hudlauncher.app.hud
 import android.graphics.Paint
 import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import com.hudlauncher.app.R
 import androidx.compose.foundation.layout.size
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.Composable
@@ -35,6 +39,15 @@ private val Ink = Color(0xFF15101F)
 /** Draws one stylised HUD icon (container included) filling the available square. */
 @Composable
 fun HudIconRenderer(type: HudIconType, modifier: Modifier = Modifier) {
+    if (type == HudIconType.VOXTUBE) {
+        Image(
+            painter = painterResource(R.drawable.ic_voxtube),
+            contentDescription = null,
+            contentScale = ContentScale.Fit,
+            modifier = modifier,
+        )
+        return
+    }
     Canvas(modifier) { drawHudIcon(type) }
 }
 
@@ -329,6 +342,8 @@ private fun DrawScope.drawHudIcon(type: HudIconType) {
             }
             drawPath(sig, Ink, style = Stroke(f(0.015f), cap = StrokeCap.Round))
         }
+
+        HudIconType.VOXTUBE -> Unit // drawn from the bitmap resource in HudIconRenderer
 
         HudIconType.BEE_EATS -> {
             container(Brush.verticalGradient(listOf(Color(0xFFFFB84D), Color(0xFFFF6B8A))))

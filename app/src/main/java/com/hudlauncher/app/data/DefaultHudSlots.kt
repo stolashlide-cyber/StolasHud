@@ -49,6 +49,8 @@ object DefaultHudSlots {
             "com.google.android.keep", "com.samsung.android.app.notes", "com.miui.notes"),
         slot("bee_eats", "BEE EATS", HudIconType.BEE_EATS,
             "ru.yandex.eda", "ru.foodfox.client", "ru.instamart"),
+        slot("voxtube", "VOXTUBE", HudIconType.VOXTUBE,
+            "com.google.android.youtube", "app.revanced.android.youtube", "ru.rutube.app"),
     )
 
     /** Lower-case app labels that are a confident match for a slot (exact or "<keyword> ..." prefix). */
@@ -61,6 +63,7 @@ object DefaultHudSlots {
         "envee" to listOf("vk видео", "vk клипы"),
         "lucimaster" to listOf("яндекс афиша", "афиша"),
         "diary" to listOf("дневник", "diary", "заметки", "notes"),
+        "voxtube" to listOf("youtube", "rutube", "ютуб"),
         "bee_eats" to listOf("яндекс еда", "купер", "delivery club"),
     )
 

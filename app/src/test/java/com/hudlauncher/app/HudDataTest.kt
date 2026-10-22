@@ -20,14 +20,14 @@ class HudDataTest {
         "MESSAGES", "FIND ME", "MAPS", "SLEEPY PILLZ",
         "VOXFLIX", "PLANT LOVER", "AUDIO TOMES", "MONEYMAKERZ BANK",
         "SINSTAGRAM", "ENVEE", "LUCIMASTER", "DIARY",
-        "BEE EATS",
+        "BEE EATS", "VOXTUBE",
     )
 
     @Test
-    fun defaultSlotsHaveSeventeenEntriesInOrder() {
-        assertEquals(17, DefaultHudSlots.all.size)
+    fun defaultSlotsHaveAllEntriesInOrder() {
+        assertEquals(18, DefaultHudSlots.all.size)
         assertEquals(expectedNames, DefaultHudSlots.all.map { it.displayName })
-        assertEquals(17, DefaultHudSlots.all.map { it.id }.toSet().size)
+        assertEquals(18, DefaultHudSlots.all.map { it.id }.toSet().size)
     }
 
     @Test
