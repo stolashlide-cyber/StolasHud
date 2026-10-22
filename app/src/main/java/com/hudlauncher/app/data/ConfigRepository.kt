@@ -33,6 +33,8 @@ object ConfigRepository {
         val backgroundDim: Float = 0f,
         val animationIntensity: Float = 1f,
         val hideSystemStatusBar: Boolean = true,
+        val dmbEnabled: Boolean = true,
+        val dmbStartDay: Long = 0L,
     )
 
     @Serializable
@@ -61,6 +63,7 @@ object ConfigRepository {
                 ui.columns, ui.showLabels, ui.iconSize, ui.labelSize, ui.labelSpacing,
                 ui.showBatteryPercent, ui.showSignal, ui.wallpaperIntensity,
                 ui.backgroundDim, ui.animationIntensity, ui.hideSystemStatusBar,
+                ui.dmbEnabled, ui.dmbStartDay,
             ),
         )
         return json.encodeToString(ConfigDto.serializer(), dto)
@@ -80,6 +83,7 @@ object ConfigRepository {
             u.columns, u.iconSize, u.labelSize, u.labelSpacing, u.showLabels,
             u.showBatteryPercent, u.showSignal, u.wallpaperIntensity,
             u.backgroundDim, u.animationIntensity, u.hideSystemStatusBar,
+            u.dmbEnabled, u.dmbStartDay,
         ).sanitized()
         return ParsedConfig(mappings, ui)
     }

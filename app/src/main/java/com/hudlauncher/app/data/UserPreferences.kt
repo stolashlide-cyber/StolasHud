@@ -30,6 +30,9 @@ data class UiSettings(
     val backgroundDim: Float = 0f,
     val animationIntensity: Float = 1f,
     val hideSystemStatusBar: Boolean = true,
+    val dmbEnabled: Boolean = true,
+    /** Service start as epoch day; 0 = not set yet (initialised to today on first launch). */
+    val dmbStartDay: Long = 0L,
 ) {
     fun sanitized() = copy(
         columns = columns.coerceIn(4, 5),
@@ -59,6 +62,8 @@ class UserPreferences(private val context: Context) {
         val backgroundDim = floatPreferencesKey("background_dim")
         val animationIntensity = floatPreferencesKey("animation_intensity")
         val hideSystemBar = booleanPreferencesKey("hide_system_status_bar")
+        val dmbEnabled = booleanPreferencesKey("dmb_enabled")
+        val dmbStartDay = longPreferencesKey("dmb_start_day")
         val onboardingDone = booleanPreferencesKey("onboarding_done")
         val autoMapDone = booleanPreferencesKey("auto_map_done")
         val wallpaperVersion = longPreferencesKey("wallpaper_version")
@@ -135,6 +140,8 @@ class UserPreferences(private val context: Context) {
             backgroundDim = this[Keys.backgroundDim] ?: d.backgroundDim,
             animationIntensity = this[Keys.animationIntensity] ?: d.animationIntensity,
             hideSystemStatusBar = this[Keys.hideSystemBar] ?: d.hideSystemStatusBar,
+            dmbEnabled = this[Keys.dmbEnabled] ?: d.dmbEnabled,
+            dmbStartDay = this[Keys.dmbStartDay] ?: d.dmbStartDay,
         ).sanitized()
     }
 
@@ -150,6 +157,8 @@ class UserPreferences(private val context: Context) {
         this[Keys.backgroundDim] = s.backgroundDim
         this[Keys.animationIntensity] = s.animationIntensity
         this[Keys.hideSystemBar] = s.hideSystemStatusBar
+        this[Keys.dmbEnabled] = s.dmbEnabled
+        this[Keys.dmbStartDay] = s.dmbStartDay
     }
 
     companion object {

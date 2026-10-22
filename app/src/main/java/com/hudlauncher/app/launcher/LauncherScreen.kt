@@ -67,6 +67,7 @@ import com.hudlauncher.app.apps.InstalledApp
 import com.hudlauncher.app.data.DefaultHudSlots
 import com.hudlauncher.app.data.HudSlot
 import com.hudlauncher.app.data.UiSettings
+import com.hudlauncher.app.hud.DmbTimerPanel
 import com.hudlauncher.app.hud.HudGrid
 import com.hudlauncher.app.hud.HudPanel
 import com.hudlauncher.app.hud.HudStatusBar
@@ -265,6 +266,12 @@ fun LauncherContent(
                 showBatteryPercent = settings.showBatteryPercent,
                 onLongPress = onStatusBarLongPress,
             )
+            if (settings.dmbEnabled && settings.dmbStartDay > 0L) {
+                DmbTimerPanel(
+                    startDay = settings.dmbStartDay,
+                    modifier = Modifier.padding(horizontal = 8.dp).padding(top = 8.dp),
+                )
+            }
             val cutout = WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal).asPaddingValues()
             val nav = WindowInsets.navigationBars.asPaddingValues()
             HudGrid(
@@ -278,7 +285,7 @@ fun LauncherContent(
                 contentPadding = PaddingValues(
                     start = 8.dp + cutout.calculateLeftPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
                     end = 8.dp + cutout.calculateRightPadding(androidx.compose.ui.unit.LayoutDirection.Ltr),
-                    top = 18.dp,
+                    top = if (settings.dmbEnabled && settings.dmbStartDay > 0L) 10.dp else 18.dp,
                     bottom = 16.dp + if (editMode) 64.dp else nav.calculateBottomPadding(),
                 ),
             )

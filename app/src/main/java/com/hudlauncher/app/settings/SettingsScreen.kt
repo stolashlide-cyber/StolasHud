@@ -16,7 +16,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -40,6 +44,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import com.hudlauncher.app.data.DmbTimer
 import com.hudlauncher.app.data.UiSettings
 import com.hudlauncher.app.hud.HudPanelShape
 import com.hudlauncher.app.hud.HudWallpaper
@@ -50,6 +55,7 @@ import com.hudlauncher.app.ui.theme.HudNeonPink
 import com.hudlauncher.app.ui.theme.HudTheme
 import kotlin.math.roundToInt
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     settings: UiSettings,
@@ -67,6 +73,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     var confirmReset by remember { mutableStateOf(false) }
+    var showDmbDatePicker by remember { mutableStateOf(false) }
 
     Box(modifier.fillMaxSize()) {
     HudWallpaper(intensity = 1f, dim = 0.55f, image = wallpaper)
@@ -113,6 +120,25 @@ fun SettingsScreen(
         SettingSwitch("SHOW SIGNAL", settings.showSignal) { v -> onUpdate { it.copy(showSignal = v) } }
         SettingSwitch("СКРЫВАТЬ СИСТЕМНЫЙ СТАТУС-БАР", settings.hideSystemStatusBar) { v -> onUpdate { it.copy(hideSystemStatusBar = v) } }
 
+        Section("ДМБ")
+        SettingSwitch("ТАЙМЕР ДМБ", settings.dmbEnabled) { v -> onUpdate { it.copy(dmbEnabled = v) } }
+        Text(
+            "Срок службы ${DmbTimer.SERVICE_DAYS} дней, начало: ${DmbTimer.formatDay(settings.dmbStartDay)}",
+            fontSize = 12.sp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = { showDmbDatePicker = true },
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp),
+                colors = HudStyle.buttonColors(),
+            ) { Text("ДАТА ПРИЗЫВА") }
+            OutlinedButton(onClick = { onUpdate { it.copy(dmbStartDay = DmbTimer.today()) } }, modifier = Modifier.weight(1f)) {
+                Text("СЕГОДНЯ")
+            }
+        }
+
         Section("WALLPAPER")
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
             Button(
@@ -152,6 +178,22 @@ fun SettingsScreen(
         )
         Spacer(Modifier.height(24.dp))
     }
+    }
+
+    if (showDmbDatePicker) {
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = (if (settings.dmbStartDay > 0L) settings.dmbStartDay else DmbTimer.today()) * 86_400_000L,
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDmbDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { ms -> onUpdate { it.copy(dmbStartDay = Math.floorDiv(ms, 86_400_000L)) } }
+                    showDmbDatePicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = { TextButton(onClick = { showDmbDatePicker = false }) { Text("ОТМЕНА") } },
+        ) { DatePicker(state = pickerState) }
     }
 
     if (confirmReset) {

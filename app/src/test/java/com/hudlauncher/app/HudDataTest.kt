@@ -5,6 +5,7 @@ import com.hudlauncher.app.apps.InstalledApp
 import com.hudlauncher.app.data.AppTarget
 import com.hudlauncher.app.data.ConfigRepository
 import com.hudlauncher.app.data.DefaultHudSlots
+import com.hudlauncher.app.data.DmbTimer
 import com.hudlauncher.app.data.UiSettings
 import com.hudlauncher.app.data.UserPreferences
 import org.junit.Assert.assertEquals
@@ -116,5 +117,23 @@ class HudDataTest {
     fun oldConfigWithoutNewFieldKeepsDefault() {
         val parsed = ConfigRepository.decode("""{"version":1,"slots":[],"ui":{"columns":4}}""")
         assertTrue(parsed.ui.hideSystemStatusBar)
+    }
+
+    @Test
+    fun dmbTimerCountsDown() {
+        assertEquals(365, DmbTimer.daysLeft(1000, 1000))
+        assertEquals(265, DmbTimer.daysLeft(1000, 1100))
+        assertEquals(0, DmbTimer.daysLeft(1000, 1365))
+        assertEquals(0, DmbTimer.daysLeft(1000, 2000))
+        assertEquals(365, DmbTimer.daysLeft(1000, 900))
+        assertEquals(0f, DmbTimer.progress(10, 10), 0.001f)
+        assertEquals(1f, DmbTimer.progress(10, 400), 0.001f)
+    }
+
+    @Test
+    fun dmbSettingsRoundTrip() {
+        val ui = UiSettings(dmbEnabled = false, dmbStartDay = 20000L)
+        val parsed = ConfigRepository.decode(ConfigRepository.encode(emptyMap(), ui))
+        assertEquals(ui, parsed.ui)
     }
 }

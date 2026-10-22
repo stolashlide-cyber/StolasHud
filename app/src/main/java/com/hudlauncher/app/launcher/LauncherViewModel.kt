@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.hudlauncher.app.apps.InstalledApp
 import com.hudlauncher.app.apps.LaunchResult
 import com.hudlauncher.app.data.DefaultHudSlots
+import com.hudlauncher.app.data.DmbTimer
 import com.hudlauncher.app.data.HudSlot
 import com.hudlauncher.app.data.UiSettings
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -65,6 +67,10 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
 
     init {
         refreshApps()
+        viewModelScope.launch {
+            val s = repo.prefs.settings.first()
+            if (s.dmbStartDay == 0L) repo.prefs.updateSettings { it.copy(dmbStartDay = DmbTimer.today()) }
+        }
     }
 
     fun onResume() {
