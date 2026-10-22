@@ -49,6 +49,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -62,6 +66,7 @@ import com.hudlauncher.app.data.DefaultHudSlots
 import com.hudlauncher.app.data.HudSlot
 import com.hudlauncher.app.data.UiSettings
 import com.hudlauncher.app.hud.HudGrid
+import com.hudlauncher.app.hud.HudPanel
 import com.hudlauncher.app.hud.HudStatusBar
 import com.hudlauncher.app.hud.HudWallpaper
 import com.hudlauncher.app.settings.SettingsScreen
@@ -123,6 +128,15 @@ fun LauncherScreen(viewModel: LauncherViewModel) {
     }
 
     val ui = settings
+    val view = LocalView.current
+    val hideBar = ui?.hideSystemStatusBar ?: true
+    LaunchedEffect(hideBar) {
+        val window = (view.context as? android.app.Activity)?.window ?: return@LaunchedEffect
+        val controller = WindowCompat.getInsetsController(window, view)
+        controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        if (hideBar) controller.hide(WindowInsetsCompat.Type.statusBars())
+        else controller.show(WindowInsetsCompat.Type.statusBars())
+    }
     Box(Modifier.fillMaxSize()) {
         if (ui != null) {
             val animation = if (reducedMotion) 0f else ui.animationIntensity
@@ -175,7 +189,15 @@ fun LauncherScreen(viewModel: LauncherViewModel) {
                 .align(Alignment.BottomCenter)
                 .windowInsetsPadding(WindowInsets.navigationBars)
                 .padding(bottom = 8.dp),
-        ) { data -> Snackbar(data) }
+        ) { data ->
+            Snackbar(
+                data,
+                shape = RoundedCornerShape(16.dp),
+                containerColor = Color(0xF2341870),
+                contentColor = Color.White,
+                actionColor = HudCyan,
+            )
+        }
 
         if (onboardingDone == false) {
             OnboardingDialog(
@@ -270,12 +292,7 @@ private fun EditBar(
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(28.dp),
-        color = Color(0xE61B0B33),
-        tonalElevation = 4.dp,
-    ) {
+    HudPanel(modifier = modifier) {
         Row(
             Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -293,12 +310,12 @@ private fun EditBar(
 @Composable
 private fun OnboardingDialog(onConfigure: () -> Unit, onMakeHome: () -> Unit, onSkip: () -> Unit) {
     Dialog(onDismissRequest = onSkip) {
-        Surface(shape = RoundedCornerShape(20.dp), color = Color(0xFF241046)) {
+        HudPanel {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text("HUD LAUNCHER", color = HudNeonPink, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                 Text("Назначьте приложения долгим нажатием на иконки.")
                 Text("После установки вы можете выбрать этот HUD как домашний экран Android.")
-                Button(onClick = onConfigure, modifier = Modifier.fillMaxWidth()) { Text("НАСТРОИТЬ") }
+                Button(onClick = onConfigure, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = com.hudlauncher.app.ui.theme.HudStyle.buttonColors()) { Text("НАСТРОИТЬ") }
                 OutlinedButton(onClick = onMakeHome, modifier = Modifier.fillMaxWidth()) {
                     Text("СДЕЛАТЬ ДОМАШНИМ ЭКРАНОМ", fontSize = 13.sp)
                 }

@@ -36,7 +36,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.Color
 import com.hudlauncher.app.data.UiSettings
+import com.hudlauncher.app.hud.HudPanelShape
+import com.hudlauncher.app.hud.HudWallpaper
+import com.hudlauncher.app.ui.theme.HudStyle
 import com.hudlauncher.app.ui.theme.HudCyan
 import com.hudlauncher.app.ui.theme.HudDeepPurple
 import com.hudlauncher.app.ui.theme.HudNeonPink
@@ -58,10 +64,11 @@ fun SettingsScreen(
 ) {
     var confirmReset by remember { mutableStateOf(false) }
 
+    Box(modifier.fillMaxSize()) {
+    HudWallpaper(intensity = 1f, dim = 0.55f)
     Column(
-        modifier
+        Modifier
             .fillMaxSize()
-            .background(HudDeepPurple.copy(alpha = 0.97f))
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -73,7 +80,7 @@ fun SettingsScreen(
         }
 
         if (!isDefaultHome) {
-            Button(onClick = onMakeHome, modifier = Modifier.fillMaxWidth()) { Text("СДЕЛАТЬ ДОМАШНИМ ЭКРАНОМ") }
+            Button(onClick = onMakeHome, modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), colors = HudStyle.buttonColors()) { Text("СДЕЛАТЬ ДОМАШНИМ ЭКРАНОМ") }
         }
 
         Section("GRID")
@@ -100,6 +107,7 @@ fun SettingsScreen(
         SettingSwitch("SHOW LABELS", settings.showLabels) { v -> onUpdate { it.copy(showLabels = v) } }
         SettingSwitch("SHOW BATTERY %", settings.showBatteryPercent) { v -> onUpdate { it.copy(showBatteryPercent = v) } }
         SettingSwitch("SHOW SIGNAL", settings.showSignal) { v -> onUpdate { it.copy(showSignal = v) } }
+        SettingSwitch("СКРЫВАТЬ СИСТЕМНЫЙ СТАТУС-БАР", settings.hideSystemStatusBar) { v -> onUpdate { it.copy(hideSystemStatusBar = v) } }
 
         Section("WALLPAPER")
         SettingSlider("WALLPAPER INTENSITY", settings.wallpaperIntensity, 0f..1f, "${(settings.wallpaperIntensity * 100).roundToInt()}%") { v ->
@@ -129,11 +137,14 @@ fun SettingsScreen(
         )
         Spacer(Modifier.height(24.dp))
     }
+    }
 
     if (confirmReset) {
         AlertDialog(
             onDismissRequest = { confirmReset = false },
-            title = { Text("Сбросить назначения?") },
+            containerColor = HudPanelColor,
+            shape = HudPanelShape,
+            title = { Text("Сбросить назначения?", color = HudNeonPink) },
             text = { Text("Все выбранные приложения будут отвязаны от HUD-иконок.") },
             confirmButton = {
                 TextButton(onClick = { confirmReset = false; onResetMappings() }) { Text("СБРОСИТЬ") }
@@ -154,7 +165,7 @@ private fun Section(title: String) {
 private fun SettingSwitch(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(label, modifier = Modifier.weight(1f), fontSize = 14.sp)
-        Switch(checked = checked, onCheckedChange = onChange)
+        Switch(checked = checked, onCheckedChange = onChange, colors = HudStyle.switchColors())
     }
 }
 
@@ -177,6 +188,7 @@ private fun SettingSlider(
             onValueChange = { local = it },
             onValueChangeFinished = { onCommit(local) },
             valueRange = range,
+            colors = HudStyle.sliderColors(),
         )
     }
 }
@@ -188,3 +200,5 @@ private fun SettingsPreview() {
         SettingsScreen(UiSettings(), false, "1.0.0", {}, {}, {}, {}, {}, {})
     }
 }
+
+private val HudPanelColor = Color(0xFF241046)

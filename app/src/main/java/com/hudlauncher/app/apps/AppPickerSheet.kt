@@ -71,7 +71,21 @@ fun AppPickerSheet(
         else apps.filter { it.appLabel.lowercase().contains(q) || it.packageName.lowercase().contains(q) }
     }
 
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = Color(0xF21B0B33),
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        dragHandle = {
+            Box(
+                Modifier
+                    .padding(vertical = 10.dp)
+                    .size(width = 44.dp, height = 4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(HudNeonPink),
+            )
+        },
+    ) {
         Column(
             Modifier
                 .fillMaxWidth()

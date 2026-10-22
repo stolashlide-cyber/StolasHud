@@ -32,6 +32,7 @@ object ConfigRepository {
         val wallpaperIntensity: Float = 1f,
         val backgroundDim: Float = 0f,
         val animationIntensity: Float = 1f,
+        val hideSystemStatusBar: Boolean = true,
     )
 
     @Serializable
@@ -59,7 +60,7 @@ object ConfigRepository {
             ui = UiDto(
                 ui.columns, ui.showLabels, ui.iconSize, ui.labelSize, ui.labelSpacing,
                 ui.showBatteryPercent, ui.showSignal, ui.wallpaperIntensity,
-                ui.backgroundDim, ui.animationIntensity,
+                ui.backgroundDim, ui.animationIntensity, ui.hideSystemStatusBar,
             ),
         )
         return json.encodeToString(ConfigDto.serializer(), dto)
@@ -78,7 +79,7 @@ object ConfigRepository {
         val ui = UiSettings(
             u.columns, u.iconSize, u.labelSize, u.labelSpacing, u.showLabels,
             u.showBatteryPercent, u.showSignal, u.wallpaperIntensity,
-            u.backgroundDim, u.animationIntensity,
+            u.backgroundDim, u.animationIntensity, u.hideSystemStatusBar,
         ).sanitized()
         return ParsedConfig(mappings, ui)
     }

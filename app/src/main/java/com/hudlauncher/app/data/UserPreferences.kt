@@ -28,6 +28,7 @@ data class UiSettings(
     val wallpaperIntensity: Float = 1f,
     val backgroundDim: Float = 0f,
     val animationIntensity: Float = 1f,
+    val hideSystemStatusBar: Boolean = true,
 ) {
     fun sanitized() = copy(
         columns = columns.coerceIn(4, 5),
@@ -56,6 +57,7 @@ class UserPreferences(private val context: Context) {
         val wallpaperIntensity = floatPreferencesKey("wallpaper_intensity")
         val backgroundDim = floatPreferencesKey("background_dim")
         val animationIntensity = floatPreferencesKey("animation_intensity")
+        val hideSystemBar = booleanPreferencesKey("hide_system_status_bar")
         val onboardingDone = booleanPreferencesKey("onboarding_done")
         val autoMapDone = booleanPreferencesKey("auto_map_done")
     }
@@ -123,6 +125,7 @@ class UserPreferences(private val context: Context) {
             wallpaperIntensity = this[Keys.wallpaperIntensity] ?: d.wallpaperIntensity,
             backgroundDim = this[Keys.backgroundDim] ?: d.backgroundDim,
             animationIntensity = this[Keys.animationIntensity] ?: d.animationIntensity,
+            hideSystemStatusBar = this[Keys.hideSystemBar] ?: d.hideSystemStatusBar,
         ).sanitized()
     }
 
@@ -137,6 +140,7 @@ class UserPreferences(private val context: Context) {
         this[Keys.wallpaperIntensity] = s.wallpaperIntensity
         this[Keys.backgroundDim] = s.backgroundDim
         this[Keys.animationIntensity] = s.animationIntensity
+        this[Keys.hideSystemBar] = s.hideSystemStatusBar
     }
 
     companion object {

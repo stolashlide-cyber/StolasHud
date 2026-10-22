@@ -8,6 +8,8 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
 import com.hudlauncher.app.launcher.LauncherScreen
 import com.hudlauncher.app.launcher.LauncherViewModel
 import com.hudlauncher.app.ui.theme.HudTheme
@@ -30,6 +32,14 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.onResume()
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        // transient system bar auto-hides; re-apply after returning from other apps
+        if (hasFocus && viewModel.settings.value?.hideSystemStatusBar != false) {
+            WindowCompat.getInsetsController(window, window.decorView).hide(WindowInsetsCompat.Type.statusBars())
+        }
     }
 
     override fun onNewIntent(intent: Intent) {

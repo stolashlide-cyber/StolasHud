@@ -47,7 +47,7 @@ class HudDataTest {
             "maps" to AppTarget("ru.yandex.yandexmaps", "ru.yandex.maps.Main"),
             "diary" to AppTarget("com.google.android.keep"),
         )
-        val ui = UiSettings(columns = 5, iconSize = 64f, showLabels = false, backgroundDim = 0.3f)
+        val ui = UiSettings(columns = 5, iconSize = 64f, showLabels = false, backgroundDim = 0.3f, hideSystemStatusBar = false)
         val parsed = ConfigRepository.decode(ConfigRepository.encode(mappings, ui))
         assertEquals(mappings, parsed.mappings)
         assertEquals(ui, parsed.ui)
@@ -110,5 +110,11 @@ class HudDataTest {
         assertEquals("ru.dublgis.dgismobile", result["maps"]?.packageName)
         assertNull(result["lucimaster"])
         assertTrue(result.values.none { it.packageName == "com.calc" })
+    }
+
+    @Test
+    fun oldConfigWithoutNewFieldKeepsDefault() {
+        val parsed = ConfigRepository.decode("""{"version":1,"slots":[],"ui":{"columns":4}}""")
+        assertTrue(parsed.ui.hideSystemStatusBar)
     }
 }

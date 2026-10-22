@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.displayCutout
@@ -107,6 +108,31 @@ fun rememberNetworkAvailable(): State<Boolean> {
 }
 
 @Composable
+fun rememberClockText(): State<String> {
+    val context = LocalContext.current
+    val text = remember { mutableStateOf("12:00") }
+    if (LocalInspectionMode.current) return text
+    DisposableEffect(context) {
+        fun update() {
+            val pattern = if (android.text.format.DateFormat.is24HourFormat(context)) "HH:mm" else "h:mm"
+            text.value = java.text.SimpleDateFormat(pattern, java.util.Locale.getDefault()).format(java.util.Date())
+        }
+        val receiver = object : BroadcastReceiver() {
+            override fun onReceive(c: Context?, intent: Intent?) = update()
+        }
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_TIME_CHANGED)
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
+        }
+        update()
+        context.registerReceiver(receiver, filter)
+        onDispose { context.unregisterReceiver(receiver) }
+    }
+    return text
+}
+
+@Composable
 fun HudStatusBar(
     showSignal: Boolean,
     showBatteryPercent: Boolean,
@@ -115,6 +141,7 @@ fun HudStatusBar(
 ) {
     val battery by rememberBatteryLevel()
     val network by rememberNetworkAvailable()
+    val clock by rememberClockText()
     val currentLongPress by rememberUpdatedState(onLongPress)
 
     Box(
@@ -125,9 +152,7 @@ fun HudStatusBar(
     ) {
         Row(
             Modifier
-                .windowInsetsPadding(
-                    WindowInsets.statusBars.union(WindowInsets.displayCutout.only(WindowInsetsSides.Horizontal)),
-                )
+                .windowInsetsPadding(WindowInsets.statusBars.union(WindowInsets.displayCutout))
                 .fillMaxWidth()
                 .height(34.dp)
                 .padding(horizontal = 12.dp),
@@ -152,6 +177,24 @@ fun HudStatusBar(
                 Spacer(Modifier.width(6.dp))
             }
             BatteryIcon(level = battery)
+        }
+        Box(
+            Modifier
+                .windowInsetsPadding(WindowInsets.statusBars.union(WindowInsets.displayCutout))
+                .fillMaxWidth()
+                .height(34.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = clock,
+                style = TextStyle(
+                    color = Color.White,
+                    fontSize = 13.sp,
+                    fontFamily = HudCondensedBold,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 0.5.sp,
+                ),
+            )
         }
     }
 }
