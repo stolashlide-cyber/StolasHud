@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - claude/android-hud-launcher-aop2sf
   pull_request:
 
 jobs:
