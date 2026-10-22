@@ -2,6 +2,7 @@ package com.hudlauncher.app.launcher
 
 import android.app.Application
 import android.net.Uri
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hudlauncher.app.apps.InstalledApp
@@ -40,6 +41,9 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     val onboardingDone: StateFlow<Boolean?> =
         repo.prefs.onboardingDone.map<Boolean, Boolean?> { it }
             .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    val wallpaper: StateFlow<ImageBitmap?> =
+        repo.wallpaper.stateIn(viewModelScope, SharingStarted.Eagerly, null)
 
     private val _installedApps = MutableStateFlow<List<InstalledApp>>(emptyList())
     val installedApps: StateFlow<List<InstalledApp>> = _installedApps.asStateFlow()
@@ -128,6 +132,17 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             repo.prefs.clearMappings()
             _events.tryEmit(UiEvent.Message("Назначения сброшены"))
         }
+    }
+
+    fun setWallpaper(uri: Uri) {
+        viewModelScope.launch {
+            val ok = runCatching { repo.setWallpaper(uri) }.isSuccess
+            if (!ok) _events.tryEmit(UiEvent.Message("Не удалось установить обои"))
+        }
+    }
+
+    fun resetWallpaper() {
+        viewModelScope.launch { repo.resetWallpaper() }
     }
 
     fun finishOnboarding() {

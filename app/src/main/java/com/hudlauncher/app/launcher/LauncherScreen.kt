@@ -4,7 +4,9 @@ import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -85,6 +87,7 @@ fun LauncherScreen(viewModel: LauncherViewModel) {
     val pickerSlotId by viewModel.pickerSlotId.collectAsStateWithLifecycle()
     val showSettings by viewModel.showSettings.collectAsStateWithLifecycle()
     val isDefaultHome by viewModel.isDefaultHome.collectAsStateWithLifecycle()
+    val wallpaper by viewModel.wallpaper.collectAsStateWithLifecycle()
 
     val snackbar = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
@@ -107,6 +110,9 @@ fun LauncherScreen(viewModel: LauncherViewModel) {
     }
     val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
         uri?.let(viewModel::importConfig)
+    }
+    val wallpaperPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri: Uri? ->
+        uri?.let(viewModel::setWallpaper)
     }
     val requestHome = { HomeRole.request(context) { homeRequest.launch(it) } }
 
@@ -143,6 +149,7 @@ fun LauncherScreen(viewModel: LauncherViewModel) {
             LauncherContent(
                 slots = slots,
                 settings = ui,
+                wallpaper = wallpaper,
                 animationIntensity = animation,
                 editMode = editMode,
                 isDefaultHome = isDefaultHome,
@@ -160,6 +167,11 @@ fun LauncherScreen(viewModel: LauncherViewModel) {
                     settings = ui,
                     isDefaultHome = isDefaultHome,
                     versionName = versionName,
+                    wallpaper = wallpaper,
+                    onPickWallpaper = {
+                        wallpaperPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                    },
+                    onResetWallpaper = viewModel::resetWallpaper,
                     onUpdate = viewModel::updateSettings,
                     onResetMappings = viewModel::resetMappings,
                     onExport = { exportLauncher.launch("hud-launcher-config.json") },
@@ -217,6 +229,7 @@ fun LauncherContent(
     animationIntensity: Float,
     editMode: Boolean,
     isDefaultHome: Boolean,
+    wallpaper: ImageBitmap? = null,
     onSlotClick: (HudSlot) -> Unit,
     onSlotLongClick: (HudSlot) -> Unit,
     onBackgroundLongPress: () -> Unit,
@@ -243,6 +256,7 @@ fun LauncherContent(
         HudWallpaper(
             intensity = settings.wallpaperIntensity,
             dim = settings.backgroundDim,
+            image = wallpaper,
             modifier = Modifier.alpha(bgAlpha.value),
         )
         Column(Modifier.fillMaxSize()) {

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import com.hudlauncher.app.data.UiSettings
 import com.hudlauncher.app.hud.HudPanelShape
 import com.hudlauncher.app.hud.HudWallpaper
@@ -54,6 +55,9 @@ fun SettingsScreen(
     settings: UiSettings,
     isDefaultHome: Boolean,
     versionName: String,
+    wallpaper: ImageBitmap?,
+    onPickWallpaper: () -> Unit,
+    onResetWallpaper: () -> Unit,
     onUpdate: ((UiSettings) -> UiSettings) -> Unit,
     onResetMappings: () -> Unit,
     onExport: () -> Unit,
@@ -65,7 +69,7 @@ fun SettingsScreen(
     var confirmReset by remember { mutableStateOf(false) }
 
     Box(modifier.fillMaxSize()) {
-    HudWallpaper(intensity = 1f, dim = 0.55f)
+    HudWallpaper(intensity = 1f, dim = 0.55f, image = wallpaper)
     Column(
         Modifier
             .fillMaxSize()
@@ -110,6 +114,17 @@ fun SettingsScreen(
         SettingSwitch("СКРЫВАТЬ СИСТЕМНЫЙ СТАТУС-БАР", settings.hideSystemStatusBar) { v -> onUpdate { it.copy(hideSystemStatusBar = v) } }
 
         Section("WALLPAPER")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = onPickWallpaper,
+                modifier = Modifier.weight(1f),
+                shape = RoundedCornerShape(14.dp),
+                colors = HudStyle.buttonColors(),
+            ) { Text("СВОИ ОБОИ") }
+            OutlinedButton(onClick = onResetWallpaper, enabled = wallpaper != null, modifier = Modifier.weight(1f)) {
+                Text("ВСТРОЕННЫЕ")
+            }
+        }
         SettingSlider("WALLPAPER INTENSITY", settings.wallpaperIntensity, 0f..1f, "${(settings.wallpaperIntensity * 100).roundToInt()}%") { v ->
             onUpdate { it.copy(wallpaperIntensity = v) }
         }
@@ -197,7 +212,7 @@ private fun SettingSlider(
 @Composable
 private fun SettingsPreview() {
     HudTheme {
-        SettingsScreen(UiSettings(), false, "1.0.0", {}, {}, {}, {}, {}, {})
+        SettingsScreen(UiSettings(), false, "1.0.0", null, {}, {}, {}, {}, {}, {}, {}, {})
     }
 }
 

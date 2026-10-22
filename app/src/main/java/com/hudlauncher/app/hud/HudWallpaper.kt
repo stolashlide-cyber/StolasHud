@@ -8,7 +8,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.StrokeCap
@@ -35,12 +38,20 @@ fun HudWallpaper(
     intensity: Float,
     dim: Float,
     modifier: Modifier = Modifier,
+    image: ImageBitmap? = null,
 ) {
     val stars = remember { generateStars() }
     Canvas(modifier.fillMaxSize()) {
         val w = size.width
         val h = size.height
         val i = intensity.coerceIn(0f, 1f)
+
+        if (image != null) {
+            drawCustomImage(image)
+            if (i < 1f) drawRect(Color(0xFF1B0B33).copy(alpha = (1f - i) * 0.55f))
+            if (dim > 0f) drawRect(Color.Black.copy(alpha = dim.coerceIn(0f, 0.9f)))
+            return@Canvas
+        }
 
         drawRect(
             Brush.verticalGradient(
@@ -95,6 +106,19 @@ fun HudWallpaper(
         if (i < 1f) drawRect(Color(0xFF1B0B33).copy(alpha = (1f - i) * 0.55f))
         if (dim > 0f) drawRect(Color.Black.copy(alpha = dim.coerceIn(0f, 0.9f)))
     }
+}
+
+/** Center-crop the image to the full canvas. */
+private fun DrawScope.drawCustomImage(image: ImageBitmap) {
+    val scale = maxOf(size.width / image.width, size.height / image.height)
+    val srcW = (size.width / scale).toInt().coerceIn(1, image.width)
+    val srcH = (size.height / scale).toInt().coerceIn(1, image.height)
+    drawImage(
+        image,
+        srcOffset = IntOffset((image.width - srcW) / 2, (image.height - srcH) / 2),
+        srcSize = IntSize(srcW, srcH),
+        dstSize = IntSize(size.width.toInt(), size.height.toInt()),
+    )
 }
 
 private fun DrawScope.glow(center: Offset, radius: Float, color: Color, alpha: Float) {

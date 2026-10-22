@@ -13,6 +13,8 @@ import com.hudlauncher.app.data.HudSlot
 import com.hudlauncher.app.data.UserPreferences
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import androidx.compose.ui.graphics.ImageBitmap
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -21,8 +23,23 @@ class LauncherRepository(private val context: Context) {
 
     val prefs = UserPreferences(context)
     private val apps = AppRepository(context)
+    private val wallpapers = WallpaperStore(context)
 
     val slots: Flow<List<HudSlot>> = prefs.mappings.map { DefaultHudSlots.applyMappings(it) }
+
+    val wallpaper: Flow<ImageBitmap?> = prefs.wallpaperVersion
+        .distinctUntilChanged()
+        .map { version -> if (version == 0L) null else withContext(Dispatchers.IO) { wallpapers.load() } }
+
+    suspend fun setWallpaper(uri: Uri) {
+        withContext(Dispatchers.IO) { wallpapers.import(uri) }
+        prefs.setWallpaperVersion(System.currentTimeMillis())
+    }
+
+    suspend fun resetWallpaper() {
+        prefs.setWallpaperVersion(0L)
+        withContext(Dispatchers.IO) { wallpapers.delete() }
+    }
 
     suspend fun loadApps(): List<InstalledApp> = apps.loadInstalledApps()
 

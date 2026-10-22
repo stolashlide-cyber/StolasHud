@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
@@ -60,6 +61,7 @@ class UserPreferences(private val context: Context) {
         val hideSystemBar = booleanPreferencesKey("hide_system_status_bar")
         val onboardingDone = booleanPreferencesKey("onboarding_done")
         val autoMapDone = booleanPreferencesKey("auto_map_done")
+        val wallpaperVersion = longPreferencesKey("wallpaper_version")
     }
 
     private val store get() = context.hudDataStore
@@ -71,6 +73,13 @@ class UserPreferences(private val context: Context) {
     val onboardingDone: Flow<Boolean> = store.data.map { it[Keys.onboardingDone] ?: false }
 
     val autoMapDone: Flow<Boolean> = store.data.map { it[Keys.autoMapDone] ?: false }
+
+    /** 0 = built-in wallpaper; otherwise a timestamp that changes with every new custom image. */
+    val wallpaperVersion: Flow<Long> = store.data.map { it[Keys.wallpaperVersion] ?: 0L }
+
+    suspend fun setWallpaperVersion(version: Long) {
+        store.edit { it[Keys.wallpaperVersion] = version }
+    }
 
     suspend fun updateSettings(transform: (UiSettings) -> UiSettings) {
         store.edit { p -> p.writeSettings(transform(p.toSettings()).sanitized()) }
